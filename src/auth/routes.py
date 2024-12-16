@@ -7,13 +7,15 @@ from datetime import timedelta, datetime
 from .services import UserService
 from .schema import CreateUser, UserResponse, UserLogin
 from .utils import verify_password, create_token
-from .dependencies import RefreshTokenBearer, AcessTokenBearer
+from .dependencies import RefreshTokenBearer, AcessTokenBearer, get_current_user, RoleChecker
 from .redis import add_jti_to_blacklist
 
 
 auth_router = APIRouter()
 user_service = UserService()
 REFRESH_TOKEN_EXPIRY = 3
+general = Depends(RoleChecker(["admin","user"]))
+admin_only = Depends(RoleChecker(["admin","user"]))
 
 @auth_router.post("/signup", response_model = UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(user_data: CreateUser, session:AsyncSession = Depends(get_session)):
@@ -37,13 +39,15 @@ async def login_user(user_info:UserLogin, session:AsyncSession = Depends(get_ses
             access_token = create_token(
                 user_data = {
                     "email":user.email,
-                    "uid":str(user.uid)
+                    "uid":str(user.uid),
+                    "role":user.role
                 }
             )
             refresh_token = create_token(
                 user_data = {
                     "email":user.email,
-                    "uid":str(user.uid)
+                    "uid":str(user.uid),
+                    "role":user.role
                 },
                 refresh=True,
                 expiry = timedelta(days=REFRESH_TOKEN_EXPIRY)
@@ -92,3 +96,7 @@ async def user_logout(token_details: dict = Depends(AcessTokenBearer())):
         content={"message":"Logout Successfull"},
         status_code=status.HTTP_200_OK
     )
+    
+@auth_router.post('/me', dependencies=[general])
+async def get_user(user = Depends(get_current_user)):
+    return user

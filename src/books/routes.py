@@ -5,12 +5,15 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 from .schema import BookResponse, CreateBook
 from src.database.main import get_session
 from src.books.services import BookService
-from src.auth.dependencies import AcessTokenBearer
+from src.auth.dependencies import AcessTokenBearer, RoleChecker
+
 
 
 book_router = APIRouter()
 book_service = BookService()
 user_creds = AcessTokenBearer()
+general = Depends(RoleChecker(["admin","user"]))
+admin_only = Depends(RoleChecker(["admin","user"]))
 
 
 @book_router.get("/", response_model=List[BookResponse], status_code=status.HTTP_200_OK)
@@ -45,20 +48,21 @@ async def get_book(
         )
 
 
-@book_router.post("/", response_model=BookResponse)
+@book_router.post("/", response_model=BookResponse, dependencies=[general])
 async def create_a_book(
     book_data: CreateBook,
     session: AsyncSession = Depends(get_session),
     credentials=Depends(user_creds),
 ):
-    new_book = await book_service.create_book(book_data, session)
+    user_uid = credentials.get("user")["uid"]
+    new_book = await book_service.create_book(book_data, user_uid, session)
     if new_book:
         return new_book
     # else:
     #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Error")
 
 
-@book_router.patch("/{book_uid}")
+@book_router.patch("/{book_uid}",dependencies=[general])
 async def update_book(
     book_uid: str,
     book_data: CreateBook,
@@ -74,7 +78,7 @@ async def update_book(
         )
 
 
-@book_router.delete("/{book_uid}", status_code=status.HTTP_204_NO_CONTENT)
+@book_router.delete("/{book_uid}", status_code=status.HTTP_204_NO_CONTENT,dependencies=[general])
 async def delete_book(
     book_uid: str,
     session: AsyncSession = Depends(get_session),

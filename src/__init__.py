@@ -19,7 +19,6 @@ app = FastAPI(
     version=version,
     description="A CRUD app for book management",
     title="BOOK APP",
-    lifespan=life_span,
 )
 app.include_router(book_router, prefix=f"/api/{version}/books")
 app.include_router(auth_router, prefix=f"/api/{version}/auth")
