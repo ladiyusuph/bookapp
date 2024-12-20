@@ -1,7 +1,7 @@
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, desc
 from datetime import datetime
-from .models import Book
+from src.database.models import Book
 from .schema import CreateBook
 
 
@@ -10,6 +10,12 @@ class BookService:
         statement = select(Book).order_by(desc(Book.created_at))
         result = await session.exec(statement)
 
+        return result.all()
+
+    async def get_user_books(self, user_uid:str, session:AsyncSession):
+        statment = select(Book).where(Book.user_uid == user_uid).order_by(desc(Book.created_at))
+        result = await session.exec(statment)
+        
         return result.all()
 
     async def get_book(self, book_uid: str, session: AsyncSession):

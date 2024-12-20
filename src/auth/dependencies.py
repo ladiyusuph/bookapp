@@ -7,7 +7,7 @@ from src.database.main import get_session
 from src.auth.services import UserService
 from .utils import decode_token
 from .redis import jti_in_blacklist
-from .models import User
+from src.database.models import User
 
 
 user_service = UserService()

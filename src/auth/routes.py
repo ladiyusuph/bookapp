@@ -5,7 +5,7 @@ from src.database.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from datetime import timedelta, datetime
 from .services import UserService
-from .schema import CreateUser, UserResponse, UserLogin
+from .schema import CreateUser, UserResponse, UserLogin, UserBookResponse
 from .utils import verify_password, create_token
 from .dependencies import RefreshTokenBearer, AcessTokenBearer, get_current_user, RoleChecker
 from .redis import add_jti_to_blacklist
@@ -97,6 +97,6 @@ async def user_logout(token_details: dict = Depends(AcessTokenBearer())):
         status_code=status.HTTP_200_OK
     )
     
-@auth_router.post('/me', dependencies=[general])
+@auth_router.post('/me', dependencies=[general], response_model=UserBookResponse)
 async def get_user(user = Depends(get_current_user)):
     return user

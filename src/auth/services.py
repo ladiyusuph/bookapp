@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .schema import CreateUser
-from .models import User
+from src.database.models import User
 from .utils import generate_password_hash
 
 

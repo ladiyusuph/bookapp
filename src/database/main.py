@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from src.config import Config
-from src.books.models import Book
+from src.database.models import Book
 # from dotenv import load_dotenv
 # import os
 
@@ -13,10 +13,10 @@ async_engine = AsyncEngine(
     echo=True
 ))
 
-async def init_db():
-    async with async_engine.begin() as conn:
+# async def init_db():
+#     async with async_engine.begin() as conn:
         
-        await conn.run_sync(SQLModel.metadata.create_all)
+#         await conn.run_sync(SQLModel.metadata.create_all)
         
 
 async def get_session() -> AsyncSession:

@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from sqlmodel import Field
 from datetime import datetime
+from src.books.schema import BookResponse
+from src.reviews.schema import ReviewSchema
+from typing import List
 import uuid
 
 class CreateUser(BaseModel):
@@ -26,3 +29,9 @@ class UserResponse(BaseModel):
     role: str
     created_at: datetime 
     updated_at: datetime 
+    
+    
+    
+class UserBookResponse(UserResponse):
+    books: List[BookResponse]
+    reviews: List[ReviewSchema]
