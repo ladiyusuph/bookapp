@@ -2,9 +2,11 @@ from src.books.services import BookService
 from src.auth.services import UserService
 from src.database.models import Review
 from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
 from fastapi.exceptions import HTTPException
 from fastapi import status
 from .schema import CreateReviewSchema
+from src.database.models import Review
 
 
 book_service = BookService()
@@ -48,3 +50,28 @@ class ReviewService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="ooops... An error occured"
             )
+            
+    async def get_review_by_id(self, review_uid:str, session:AsyncSession):
+        review = select(Review).where(Review.uid==review_uid)
+        
+        result = await session.exec(review)
+        
+        return result.first()
+    
+    async def delete_review(self, review_uid: str, session:AsyncSession):
+        review = await self.get_review_by_id(review_uid, session)
+        
+        if review:
+            await session.delete(review)
+            await session.commit()
+            return True
+        else:
+            return None
+        
+    async def get_all_users_reviews(self, user_uid: str, session: AsyncSession):
+        user_reviews = select(Review).where(Review.user_uid == user_uid)
+        
+        result = await session.exec(user_reviews)
+        
+        return result.all()
+        
